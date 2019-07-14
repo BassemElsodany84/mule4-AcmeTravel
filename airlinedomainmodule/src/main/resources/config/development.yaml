@@ -1,0 +1,12 @@
+env: development
+
+httpListener:
+  host: "0.0.0.0"
+  port: "8085"
+  
+database:
+  host: "rds-mysql-assessment.ckld9drpn0yb.eu-west-1.rds.amazonaws.com"
+  port: "3306"
+  username: "bassem"
+  password: "bassem2019"
+  schema: "airlines_sandbox"
