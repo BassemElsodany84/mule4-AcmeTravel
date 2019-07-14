@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="error" format="json">
+      <types:shape format="weave" example="api/examples/error.json"><![CDATA[%dw 2.0
+
+type error = {|
+  message: String, 
+  code: Number {"typeId": "int"}
+|} {"example": "{\"message\":\"Not found\",\"code\":1001}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="selectFlightQuery" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: object
+properties:
+    flightCode: string
+    airlineId: number
+    airlineName: string
+    departureAirportId: number
+    departureAirportName: string
+    destinationAirportId: number
+    destinationAirportName: string
+    departureDate: datetime
+    aircraftType: string
+    seatAvailability: number
+    price: number
+    Codeshare: string
+    stops: number
+    equipment: string
+    
+    
+    ]]></types:shape>
+    </types:type>
+    <types:type name="selectQueryResultSet" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: object
+properties:
+    flightCode: string
+    airlineId: number
+    airlineName: string
+    departureAirportId: number
+    departureAirportName: string
+    destinationAirportId: number
+    destinationAirportName: string
+    departureDate: datetime
+    aircraftType: string
+    seatAvailability: number
+    price: number
+    Codeshare: string
+    stops: number
+    equipment: string]]></types:shape>
+    </types:type>
+    <types:type name="selectQuery" format="json">
+      <types:shape format="weave" example="api/examples/flightsQuery.json"><![CDATA[%dw 2.0
+
+type selectQuery = Array<{|  flightCode: String,   airlineId: Number {"typeId": "int"},   airlineName: String,   departureAirportId: Number {"typeId": "int"},   departureAirportName: String,   destinationAirportId: Number {"typeId": "int"},   destinationAirportName: String,   departureDate: String,   aircraftType: String,   seatAvailability: Number {"typeId": "int"},   price: Number {"typeId": "int"},   Codeshare: String,   stops: Number {"typeId": "int"},   equipment: String|}> {"example": "[{\"flightCode\":\"BA001\",\"airlineId\":1,\"airlineName\":\"British Airways\",\"departureAirportId\":10,\"departureAirportName\":\"JFK\",\"destinationAirportId\":11,\"destinationAirportName\":\"LCY\",\"departureDate\":\"2017-03-15 20:30:00\",\"aircraftType\":\"Airbus A318\",\"seatAvailability\":123,\"price\":1890,\"Codeshare\":\"Y\",\"stops\":1,\"equipment\":\"Airbus A318\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="FlightObject" format="json">
+      <types:shape format="weave" example="api/examples/flight.json"><![CDATA[%dw 2.0
+
+type FlightObject = {|
+  code: String, 
+  route: {|
+    airline: String, 
+    airlineId: Number {"typeId": "int"}, 
+    sourceAirport: String, 
+    sourceAirportId: Number {"typeId": "int"}, 
+    destinationAirport: String, 
+    destinationAirportId: Number {"typeId": "int"}, 
+    codeShare: String, 
+    stops: Boolean, 
+    equipment: String
+  |}, 
+  departureDate: String, 
+  aircraftType: String, 
+  seatAvailability: Number {"typeId": "int"}, 
+  price: Number {"typeId": "double"}
+|} {"example": "{\"code\":\"BA001\",\"route\":{\"airline\":\"British Airways\",\"airlineId\":1355,\"sourceAirport\":\"JFK\",\"sourceAirportId\":3797,\"destinationAirport\":\"LCY\",\"destinationAirportId\":503,\"codeShare\":\"Y\",\"stops\":false,\"equipment\":\"318\"},\"departureDate\":\"2017-03-15 20:30:00\",\"aircraftType\":\"Airbus A318\",\"seatAvailability\":32,\"price\":1400.00}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#cb171195-08b5-4186-a8b3-89dc8ca772fb">
+    <types:operation-declaration>
+      <types:inputs>
+        <types:parameter name="value" type="error"/>
+      </types:inputs>
+    </types:operation-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c5849f3e-1278-44a3-a2b3-4b296806d43c"/>
+  <types:enrichment select="#78906045-c063-40fa-8254-515efeee6dac">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="FlightObject"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#800f3a9a-4304-496c-a370-2b9e6fb43712">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="FlightObject"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#93ca2e85-7b12-4691-92c5-22c0073d22ec"/>
+  <types:enrichment select="#b44efccf-f7cf-47ec-8597-aa23633249a0"/>
+</types:mule>

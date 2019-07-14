@@ -1,0 +1,14 @@
+#%RAML 1.0 DataType
+
+properties:
+  code:
+   type: string
+   required: true
+  route: !include route.raml
+  departureDate: 
+    type: string 
+    required: true
+    example: 2015-07-04 21:00:00
+  aircraftType: string
+  seatAvailability?: number
+  price: number

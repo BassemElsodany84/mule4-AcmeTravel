@@ -1,0 +1,11 @@
+{
+
+  "id": 1,
+  "name": "Private flight",
+  "alias": "\\N",
+  "iataCode": "-",
+  "icaoCode": "N/A",
+  "callSign": "",
+  "country": "",
+  "active": "Y"
+}

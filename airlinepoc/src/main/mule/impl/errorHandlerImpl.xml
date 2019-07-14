@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+		<error-handler name="implmentationError_Handler" doc:id="b22b37ce-9381-478f-b76e-0b574456bfed" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6c5338c1-206c-43ad-9686-b3a7f72edd57" >
+			<set-variable value="500" doc:name="Set Variable" doc:id="3ddd24f5-9471-4a2f-a116-058eadad6c9e" variableName="httpStatus"/>
+			<set-payload value='#[output application/json
+---
+{
+	"message" : error.description,
+    "code" : 1001
+}]' doc:name="Set Error Payload" doc:id="9aa8e64e-0f00-4f3a-ac7b-0dcab4d35222" />
+		</on-error-continue>
+	</error-handler>
+	
+	</mule>

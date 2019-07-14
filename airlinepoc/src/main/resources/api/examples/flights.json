@@ -1,0 +1,182 @@
+[
+  {
+    "code": "BA001",
+    "route": {
+      "airline": "British Airways",
+      "airlineId": 1355,
+      "sourceAirport": "JFK",
+      "sourceAirportId": 3797,
+      "destinationAirport": "LCY",
+      "destinationAirportId": 503,
+      "codeShare": "Y",
+      "stops": false,
+      "equipment": "318"
+    },
+    "departureDate": "2017-03-15 20:30:00",
+    "aircraftType": "Airbus A318",
+    "seatAvailability": 32,
+    "price": 1400.00
+  },
+  {
+    "code": "BA105",
+    "route": {
+      "airline": "British Airways",
+      "airlineId": 1355,
+      "sourceAirport": "LHR",
+      "sourceAirportId": 507,
+      "destinationAirport": "JFK",
+      "destinationAirportId": 3797,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "744 777"
+    },
+    "departureDate": "2017-03-15 06:30:00",
+    "aircraftType": "Boeing 747-400",
+    "seatAvailability": 463,
+    "price": 452.18
+  },
+  {
+    "code": "BA285",
+    "route": {
+      "airline": "British Airways",
+      "airlineId": 1355,
+      "sourceAirport": "LHR",
+      "sourceAirportId": 507,
+      "destinationAirport": "SFO",
+      "destinationAirportId": 3469,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "744"
+    },
+    "departureDate": "2017-03-15 10:40:00",
+    "aircraftType": "Boeing 747-400",
+    "seatAvailability": 635,
+    "price": 452.18
+  },
+  {
+    "code": "CX888",
+    "route": {
+      "airline": "Cathay Pacific",
+      "airlineId": 1680,
+      "sourceAirport": "HKG",
+      "sourceAirportId": 3077,
+      "destinationAirport": "YVR",
+      "destinationAirportId": 156,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "77W"
+    },
+    "departureDate": "2017-03-16 01:00:00",
+    "aircraftType": "Boeing 777-300ER",
+    "seatAvailability": 319,
+    "price": 679.89
+  },
+  {
+    "code": "EK412",
+    "route": {
+      "airline": "Emirates",
+      "airlineId": 2183,
+      "sourceAirport": "SYD",
+      "sourceAirportId": 3361,
+      "destinationAirport": "CHC",
+      "destinationAirportId": 2009,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "77W"
+    },
+    "departureDate": "2017-03-15 08:45:00",
+    "aircraftType": "Boeing 777-300ER",
+    "seatAvailability": 360,
+    "price": 400.00
+  },
+  {
+    "code": "FR3883",
+    "route": {
+      "airline": "Ryanair",
+      "airlineId": 4296,
+      "sourceAirport": "MLA",
+      "sourceAirportId": 1606,
+      "destinationAirport": "LTN",
+      "destinationAirportId": 492,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "738"
+    },
+    "departureDate": "2017-03-15 11:45:00",
+    "aircraftType": "Boeing 737-800",
+    "seatAvailability": 189,
+    "price": 44.20
+  },
+  {
+    "code": "KM116",
+    "route": {
+      "airline": "Air Malta",
+      "airlineId": 242,
+      "sourceAirport": "MLA",
+      "sourceAirportId": 1606,
+      "destinationAirport": "LGW",
+      "destinationAirportId": 502,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "320 319"
+    },
+    "departureDate": "2017-03-15 08:40:00",
+    "aircraftType": "Airbus A319",
+    "seatAvailability": 123,
+    "price": 129.00
+  },
+  {
+    "code": "KM587",
+    "route": {
+      "airline": "KLM Royal Dutch Airlines",
+      "airlineId": 3090,
+      "sourceAirport": "AMS",
+      "sourceAirportId": 580,
+      "destinationAirport": "LOS",
+      "destinationAirportId": 273,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "330"
+    },
+    "departureDate": "2017-03-15 20:45:00",
+    "aircraftType": "Airbus A330 all models",
+    "seatAvailability": 333,
+    "price": 685.00
+  },
+  {
+    "code": "LH963",
+    "route": {
+      "airline": "Lufthansa",
+      "airlineId": 3320,
+      "sourceAirport": "EDI",
+      "sourceAirportId": 535,
+      "destinationAirport": "FRA",
+      "destinationAirportId": 340,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "321 32A 320 319"
+    },
+    "departureDate": "2017-03-15 12:40:00",
+    "aircraftType": "Airbus A320",
+    "seatAvailability": 144,
+    "price": 197.00
+  },
+  {
+    "code": "TK1981",
+    "route": {
+      "airline": "Turkish Airlines",
+      "airlineId": 4951,
+      "sourceAirport": "IST",
+      "sourceAirportId": 1701,
+      "destinationAirport": "LGW",
+      "destinationAirportId": 502,
+      "codeShare": "",
+      "stops": false,
+      "equipment": "739 321 738"
+    },
+    "departureDate": "2017-03-15 08:05:00",
+    "aircraftType": "Boeing 737-900",
+    "seatAvailability": 215,
+    "price": 308.60
+  }
+]

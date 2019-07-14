@@ -1,0 +1,18 @@
+{
+    "code": "BA001",
+    "route": {
+      "airline": "British Airways",
+      "airlineId": 1355,
+      "sourceAirport": "JFK",
+      "sourceAirportId": 3797,
+      "destinationAirport": "LCY",
+      "destinationAirportId": 503,
+      "codeShare": "Y",
+      "stops": false,
+      "equipment": "318"
+    },
+    "departureDate": "2017-03-15 20:30:00",
+    "aircraftType": "Airbus A318",
+    "seatAvailability": 32,
+    "price": 1400.00
+  }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="impl:getAirportForAirline" doc:id="e2e94eb1-0f67-44cf-9829-4c39fcf9cb9a" >
+		<db:select doc:name="Select airports from database" doc:id="ababb918-07d2-4db2-adcd-c24e22b93efe" config-ref="AirlineDatabaseConnectionConfig" maxRows="1000">
+			<db:sql >#[&quot;select airports.airport_ID id,airports.Name name, airports.City city , airports.Country country from airports airports where airports.airport_id in (SELECT DISTINCT routes.destination_Airport_ID FROM routes routes where routes.Airline_ID in (select airlines.Airline_ID from airlines where airlines.Name = :airlineName) ) limit $(attributes.queryParams.offset default 1),$(attributes.queryParams.pageSize default 10)&quot;]</db:sql>
+			<db:input-parameters ><![CDATA[#[{"airlineName": attributes.queryParams.airlineName }]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="ConstructAirportPayload" doc:id="b31e0fd0-2b4a-4972-83cc-10f683810553" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map(airport,index)->{
+	"id": airport.id,
+    "name": airport.name,
+    "city": airport.city,
+    "country": airport.country,
+
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	
+	</mule>

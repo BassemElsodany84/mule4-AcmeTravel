@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	
+	<sub-flow name="selectRoueAndConstructPayload" doc:id="c6e5ff3e-5901-4dfa-a3d9-8d33008535fd" >
+		<db:select doc:name="Select route" doc:id="3a80dd2c-015d-4416-a55e-fde71fb7a339" config-ref="AirlineDatabaseConnectionConfig">
+			<db:sql>#[&quot;$(vars.routeSQLVar)&quot;]</db:sql>
+		</db:select>
+		<ee:transform doc:name="ConstructPayload" doc:id="0329c867-0375-4cdc-b339-bd86ad002825">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map(route,index)->{
+      "airline": route.airline,
+      "airlineId": route.airlineId,
+      "airlineName": route.airlineName,
+      "sourceAirport": route.sourceAirport,
+      "sourceAirportId": route.sourceAirportId,
+      "destinationAirport": route.destinationAirport,
+      "destinationAirportId": route.destinationAirportId,
+      "codeShare": route.Codeshare,
+      "stops": route.stops,
+      "equipment": route.equipment	
+	}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<flow name="impl:getRoute" doc:id="048c35f9-b75e-41ad-9f3f-340cdbbc4150" >
+		<ee:transform doc:name="ConstructSQLBasedOnConditions" doc:id="93ca2e85-7b12-4691-92c5-22c0073d22ec" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="routeSQLVar" ><![CDATA[%dw 2.0
+import * from dw::Core
+
+output text/plain
+var airlineId=attributes.uriParams.airlineId as String default ""
+
+var sourceAirportId=attributes.uriParams.sourceAirportId as String default ""
+
+var destinationAirportId=attributes.uriParams.destinationAirportId as String default ""
+
+var selectQuery="SELECT routes.Airline airline, routes.Airline_ID airlineId,  routes.Source_Airport_ID sourceAirportId, routes.Source_Airport sourceAirport, routes.Destination_Airport_ID destinationAirportId,  routes.Destination_Airport destinationAirport,   routes.Codeshare codeShare,  routes.Stops stops, routes.Equipment equipment
+FROM airlines_sandbox.routes routes "
+---
+if (airlineId !=null and airlineId !='' and sourceAirportId !=null and sourceAirportId !='' and destinationAirportId !=null and destinationAirportId !='')
+selectQuery ++ " Where routes.Airline_ID=" ++ airlineId ++ " AND routes.Source_Airport_ID=" ++ sourceAirportId ++ " AND routes.Destination_Airport_ID=" ++ destinationAirportId
+
+else if(airlineId !=null and airlineId !='' and sourceAirportId !=null and sourceAirportId !='')
+selectQuery ++ " Where routes.Airline_ID=" ++ airlineId ++ " AND routes.Source_Airport_ID=" ++ sourceAirportId
+
+else if(airlineId !=null and airlineId !='')
+selectQuery ++ " Where routes.Airline_ID='" ++ airlineId ++ "'"
+else
+selectQuery
+	]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="SelectRoute" doc:id="672519a3-471a-446a-aa2d-6c2f830dd838" name="selectRoueAndConstructPayload" />
+	</flow>
+	<flow name="impl:getRouteBasedOnPayloadData" doc:id="9696fa00-d6ac-46f1-bfa5-47dbf8c09f63" >
+		<ee:transform doc:name="ConstructSQLBasedOnConditions" doc:id="b44efccf-f7cf-47ec-8597-aa23633249a0" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="routeSQLVar" ><![CDATA[%dw 2.0
+import * from dw::Core
+
+output text/plain
+var airlineId=payload.route.airlineId as String default ""
+
+var sourceAirportId=payload.route.sourceAirportId as String default ""
+
+var destinationAirportId=payload.route.destinationAirportId as String default ""
+
+var selectQuery="SELECT routes.Airline airline, routes.Airline_ID airlineId,airlines.Name airlineName,  routes.Source_Airport_ID sourceAirportId, routes.Source_Airport sourceAirport, routes.Destination_Airport_ID destinationAirportId,  routes.Destination_Airport destinationAirport,   routes.Codeshare codeShare,  routes.Stops stops, routes.Equipment equipment
+FROM airlines_sandbox.routes routes left join airlines_sandbox.airlines airlines on (routes.Airline_ID=airlines.Airline_ID)"
+---
+if (airlineId !=null and airlineId !='' and sourceAirportId !=null and sourceAirportId !='' and destinationAirportId !=null and destinationAirportId !='')
+ selectQuery ++ " Where routes.Airline_ID=" ++ airlineId ++ " AND routes.Source_Airport_ID=" ++ sourceAirportId ++ " AND routes.Destination_Airport_ID=" ++ destinationAirportId
+ 
+ else
+  "Invalid"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="94b35dda-8994-4562-bec7-04258bda9104" >
+			<when expression='#[vars.routeSQLVar == "Invalid"]'>
+				<raise-error doc:name="Raise error" doc:id="886a888b-fb94-4624-a5ed-8b7c323ec045" type="ROUTE:INVALID_DATA" description="InvalidQueryData"/>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="SelectRoute" doc:id="25b3da7e-cc44-46a4-8eac-cdc13657ff42" name="selectRoueAndConstructPayload" />
+			</otherwise>
+		</choice>
+	</flow>
+	</mule>

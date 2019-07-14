@@ -1,0 +1,129 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/413c8a2b-5e38-4f3a-9522-700117df3076/ # 
+title: airlinesAPI
+version: v1.0
+protocols: [HTTP]
+mediaType: application/json
+
+types:
+  airline: !include dataTypes/airline.raml
+  route: !include dataTypes/route.raml
+  airport: !include dataTypes/airport.raml
+  flight: !include dataTypes/flight.raml
+  newFlight: !include dataTypes/newFlight.raml
+  aircraft: !include dataTypes/aircraft.raml
+  error: !include dataTypes/error.raml
+
+
+resourceTypes:
+  collection:
+    usage: Use this resourceType to represent a collection of items
+    description: A collection of <<resourcePathName|!uppercamelcase>>
+    get:
+      description: |
+        Get all <<resourcePathName|!uppercamelcase>>,
+        optionally filtered
+      is: [ hasResponseCollection: { typeName: <<typeName>> } ]
+    
+    post?:
+      description: |
+        Create a new <<resourcePathName|!uppercamelcase|!singularize>>
+      is: [ hasRequestItem: { typeName: <<typeName>> } ]
+      responses:
+        201:
+          body:
+            application/json:
+              type: <<typeName>>
+  item:
+    usage: Use this resourceType to represent any single item
+    description: A single <<typeName>>
+    get:
+      description: Get a <<typeName>>
+      is: [ hasResponseItem: { typeName: <<typeName>> }, hasNotFound ]
+    patch:
+      description: Patch a <<typeName>>
+      is: [ hasRequestItem: { typeName: <<typeName>> }, hasResponseItem: { typeName: <<typeName>> }, hasNotFound ]
+
+traits:
+  hasRequestItem:
+    body:
+      application/json:
+        type: <<typeName>>
+  hasResponseItem:
+    responses:
+      200:
+        body:
+          application/json:
+            type: <<typeName>>
+  hasResponseCollection:
+    responses:
+      200:
+        body:
+          application/json:
+            type: <<typeName>>[]
+  hasNotFound:
+    responses:
+      404:
+        body:
+          application/json:
+            type: error
+            example: !include examples/error.json
+
+
+/flights:
+  type: { collection: { typeName: flight} }
+  get:
+    queryParameters:
+      departureDate?:
+        type: date-only
+        example: "2017-03-15"
+      pageSize?: number
+      offset?: number
+  /{flightCode}:
+    type: { collection: { typeName: flight} }
+    get:
+    /{departureDate}:
+      type: { item: { typeName: flight} }
+      get:
+      patch:
+       queryParameters:
+        priceAction?:
+         enum: [increase,decrease]
+         
+  post:
+   is: [ hasRequestItem: { typeName: newFlight } ]
+     
+/airports:
+  type: { collection: { typeName: airport } }
+  get:
+    queryParameters:
+      airlineName: 
+        type: string
+        required: true
+        example: "British Airways"
+      pageSize?: number
+      offset?: number
+      
+/routes:
+  type: { collection: { typeName: route} }
+  get:
+  /{airlineId}:
+    uriParameters: 
+     airlineId:
+      type: number
+      required: true
+    type: { collection: { typeName: route} }  
+    get:
+    /{sourceAirportId}:
+     uriParameters: 
+      sourceAirportId:
+       type: number
+       required: true
+     type: { collection: { typeName: route} }
+     get:
+     /{destinationAirportId}:
+      uriParameters: 
+       destinationAirportId:
+        type: number
+        required: true
+      type: { item: { typeName: route} }

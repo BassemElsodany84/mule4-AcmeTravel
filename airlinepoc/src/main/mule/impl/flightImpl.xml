@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<sub-flow name="ConstructPayload" doc:id="168a7252-93db-466b-a010-44e454d52cfb" >
+		<ee:transform doc:name="ConstructPayload" doc:id="4a864154-2940-40af-ba0a-b53b0113843b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+type dateTimeFormatter=String {format:"yyyy-MM-dd HH:mm:ss"}
+type dateFormatter=Date {format:"yyyy-MM-dd"}
+output application/json
+---
+payload map(flight,index)->{
+	"code": flight.flightCode,
+    "route": {
+      "airline": flight.airlineName,
+      "airlineId": flight.airlineId,
+      "sourceAirport": flight.departureAirportName,
+      "sourceAirportId": flight.departureAirportId,
+      "destinationAirport": flight.destinationAirportName,
+      "destinationAirportId": flight.destinationAirportId,
+      "codeShare": flight.Codeshare,
+      "stops": flight.stops,
+      "equipment": flight.equipment
+    },
+    "departureDate": flight.departureDate as dateTimeFormatter,
+    "aircraftType": flight.aircraftType,
+    "seatAvailability": flight.seatAvailability,
+    "price": flight.price		
+	}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<flow name="impl:getAllFlights" doc:id="8b0a8df6-a42a-46b9-b534-3834f438b0ba" >
+		<ee:transform doc:name="Transform Message" doc:id="c5849f3e-1278-44a3-a2b3-4b296806d43c" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="selectFlightQueryVar" ><![CDATA[%dw 2.0
+import * from dw::Core
+
+output text/plain
+var selectQuery="SELECT flights.Flight_Code flightCode, routes.Airline_ID airlineId,flights.Airline_Name airlineName,routes.Source_Airport_ID departureAirportId, flights.Departure_Airport departureAirportName,routes.Destination_Airport_ID destinationAirportId, flights.Destination_Airport destinationAirportName, DATE_FORMAT(flights.Departure_Date, '%Y-%m-%d %H:%i:%s') departureDate, flights.Aircraft_Type aircraftType ,flights.Seat_Availability seatAvailability, flights.Price price,routes.Codeshare Codeshare,routes.Stops stops,routes.Equipment equipment 
+FROM airlines_sandbox.flights_bassem flights left join airlines_sandbox.routes routes
+on ( routes.Source_Airport=flights.Departure_Airport AND routes.Destination_Airport=flights.Destination_Airport )
+where routes.Airline_ID in (select Airline_ID from airlines where airlines.Name = flights.Airline_Name)"
+---
+if (isEmpty(attributes.queryParams.departureDate) ) 
+selectQuery
+else 
+selectQuery ++" AND Departure_Date BETWEEN '" ++ attributes.queryParams.departureDate as String ++" 00:00:00' AND '" ++ attributes.queryParams.departureDate as String ++" 23:59:59'"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Select flights" doc:id="3cf2f29b-7821-4296-91e4-e3de7181b56c" config-ref="AirlineDatabaseConnectionConfig">
+			<db:sql >#[&quot;$(vars.selectFlightQueryVar) limit $(attributes.queryParams.offset default 1),$(attributes.queryParams.pageSize default 10)&quot;]</db:sql>
+		</db:select>
+		<flow-ref doc:name="ConstructPayload" doc:id="5c8d00cb-5568-4ae8-a9fa-fc74ea1579c4" name="ConstructPayload" />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ebd69ad7-32a9-4222-84d1-7073f2827c36" type="DB:CONNECTIVITY">
+				<set-variable value="500" doc:name="Set Variable" doc:id="54fd29f0-bd46-44eb-a357-19643eac1329" variableName="httpStatus"/>
+				<set-payload value='#[output application/json
+---
+{
+	"message" : error.description,
+    "code" : 1001
+}]' doc:name="Set Payload" doc:id="cb171195-08b5-4186-a8b3-89dc8ca772fb" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	
+	<flow name="impl:getFlightByFlightCode" doc:id="64a1d424-dfa0-4aed-8aac-d5148df189c9" >
+		<db:select doc:name="SelectFlightByFlightCode" doc:id="77015f2d-5e83-4a56-b3ed-71020df066b3" config-ref="AirlineDatabaseConnectionConfig">
+			<db:sql >SELECT flights.Flight_Code flightCode, routes.Airline_ID airlineId,flights.Airline_Name airlineName,routes.Source_Airport_ID departureAirportId, flights.Departure_Airport departureAirportName,routes.Destination_Airport_ID destinationAirportId, flights.Destination_Airport destinationAirportName, DATE_FORMAT(flights.Departure_Date, '%Y-%m-%d %H:%i:%s') departureDate, flights.Aircraft_Type aircraftType ,flights.Seat_Availability seatAvailability, flights.Price price,routes.Codeshare Codeshare,routes.Stops stops,routes.Equipment equipment 
+FROM airlines_sandbox.flights_bassem flights left join airlines_sandbox.routes routes
+on ( routes.Source_Airport=flights.Departure_Airport AND routes.Destination_Airport=flights.Destination_Airport )
+where routes.Airline_ID in (select Airline_ID from airlines where airlines.Name = flights.Airline_Name) and flights.Flight_Code = :flightCode</db:sql>
+			<db:input-parameters ><![CDATA[#[{"flightCode": attributes.uriParams.flightCode}]]]></db:input-parameters>
+		</db:select>
+		<flow-ref doc:name="ConstructPayload" doc:id="f174a366-c113-4467-b622-e59ff3a77c27" name="ConstructPayload" />
+	</flow>
+	<flow name="impl:getFlightByFlightCodeFlightDeparture" doc:id="b2f23469-169e-4d1b-9c73-90066c7d0db6" >
+		<db:select doc:name="SelectFlightByFlightCodeDepartureDate" doc:id="e6d6f341-ee2b-480c-8709-1dafd1d5590b" config-ref="AirlineDatabaseConnectionConfig" >
+			<db:sql >SELECT flights.Flight_Code flightCode, routes.Airline_ID airlineId,flights.Airline_Name airlineName,routes.Source_Airport_ID departureAirportId, flights.Departure_Airport departureAirportName,routes.Destination_Airport_ID destinationAirportId, flights.Destination_Airport destinationAirportName, DATE_FORMAT(flights.Departure_Date, '%Y-%m-%d %H:%i:%s') departureDate, flights.Aircraft_Type aircraftType ,flights.Seat_Availability seatAvailability, flights.Price price,routes.Codeshare Codeshare,routes.Stops stops,routes.Equipment equipment 
+FROM airlines_sandbox.flights_bassem flights left join airlines_sandbox.routes routes
+on ( routes.Source_Airport=flights.Departure_Airport AND routes.Destination_Airport=flights.Destination_Airport )
+where routes.Airline_ID in (select Airline_ID from airlines where airlines.Name = flights.Airline_Name) and flights.Flight_Code = :flightCode AND flights.Departure_Date= :departureDate</db:sql>
+			<db:input-parameters ><![CDATA[#[{"flightCode": attributes.uriParams.flightCode,"departureDate":attributes.uriParams.departureDate}]]]></db:input-parameters>
+		</db:select>
+		<flow-ref doc:name="ConstructPayload" doc:id="505f7169-fbe6-4da3-b9c7-c795dfca02e8" name="ConstructPayload" />
+	</flow>
+	<flow name="impl:PatchFlightByFlightCodeFlightDeparture" doc:id="78906045-c063-40fa-8254-515efeee6dac" >
+		<flow-ref doc:name="CheckIfFlightExist" doc:id="e8fb6724-1513-41a0-b40a-7502eb125358" name="impl:getFlightByFlightCodeFlightDeparture" target="getFlightByFlightCodeFlightDeparture" />
+		<choice doc:name="CheckIfFlightExist" doc:id="b00e1925-030e-438f-af55-2b89e310af3a" >
+			<when expression="#[dw::Core::isEmpty(vars.getFlightByFlightCodeFlightDeparture.code)]">
+				<set-variable value="404" doc:name="Set Variable" doc:id="a9ec1052-0c0e-42a4-b9bf-4de925c89bdf" variableName="httpStatus" />
+				<set-payload value='#[output application/json --- {
+    "message" : attributes.uriParams.flightCode ++" Flight Not found with this date "++ attributes.uriParams.departureDate,
+    "code" : 1002
+    }]' doc:name="Set Payload" doc:id="47fabd81-2a61-46dc-842d-b51262617447" />
+			</when>
+			<otherwise >
+			<choice doc:name="CheckIfPriceChangeOrSeatChange" doc:id="8cf51dc6-a5c4-4549-bc30-165d31d3ffcd">
+					<when expression="#[dw::Core::isEmpty(attributes.queryParams.priceAction)]">
+						<db:update doc:name="UpdateFlightAvailabiltySeats" doc:id="fd0fab5b-1fbc-4a59-903a-84ee2a1c2807" config-ref="AirlineDatabaseConnectionConfig" target="updateStatus">
+							<db:sql>UPDATE flights_bassem SET Seat_Availability = :newSeatAvailbiltyVal WHERE Flight_Code = :flightCode and Departure_Date = :departureDate;</db:sql>
+							<db:input-parameters><![CDATA[#[{"newSeatAvailbiltyVal":payload.seatAvailability,"flightCode":attributes.uriParams.flightCode,"departureDate":attributes.uriParams.departureDate}]]]></db:input-parameters>
+						</db:update>
+						<flow-ref doc:name="getFlightAfterUpdate" doc:id="b15a304d-3015-45ff-9296-a5d6882d11fa" name="impl:getFlightByFlightCodeFlightDeparture" />
+					</when>
+					<otherwise>
+						<ee:transform doc:name="Transform Message" doc:id="56a5e544-0456-4635-af06-47fe264411b0" >
+							<ee:message >
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="CheckPriceChanges" ><![CDATA[%dw 2.0
+import * from dw::Core
+
+output text/plain
+---
+if (attributes.queryParams.priceAction == "decrease") 
+	vars.getFlightByFlightCodeFlightDeparture[0].price as Number - payload.price as Number
+else
+	vars.getFlightByFlightCodeFlightDeparture[0].price as Number + payload.price as Number]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<choice doc:name="Choice" doc:id="5dca3a9c-8700-45f2-a7fa-680884332b65" >
+							<when expression="#[vars.CheckPriceChanges &gt;= 0]">
+								<db:update doc:name="UpdateFlightPrice" doc:id="7cd7c814-24f7-40a8-93e3-93278ced7110" config-ref="AirlineDatabaseConnectionConfig" target="updateStatus" >
+									<db:sql >UPDATE flights_bassem SET Price = :newprice WHERE Flight_Code = :flightCode and Departure_Date = :departureDate;</db:sql>
+									<db:input-parameters ><![CDATA[#[{"newprice":vars.CheckPriceChanges,"flightCode":attributes.uriParams.flightCode,"departureDate":attributes.uriParams.departureDate}]]]></db:input-parameters>
+								</db:update>
+								<flow-ref doc:name="getFlightAfterUpdate" doc:id="14e7003b-c138-44bf-ada3-3c0ad0aefb77" name="impl:getFlightByFlightCodeFlightDeparture" />
+							</when>
+							<otherwise >
+								<set-variable value="404" doc:name="Set HTTP STATUS Variable" doc:id="db804b0f-fd86-4d7b-bdaa-0c6592d86c2a" variableName="httpStatus" />
+								<set-payload value='#[output application/json --- {
+    "message" : "Current Flight Price is " ++ vars.getFlightByFlightCodeFlightDeparture[0].price as String ++ " decreasing price by " ++ payload.price ++ " will make it zero or with minus!",
+        "code" : 1003
+    }]' doc:name="Set Error Payload" doc:id="4b50827d-bd92-441c-82ce-0b9089af7691" />
+							</otherwise>
+						</choice>
+					</otherwise>
+				</choice>
+			
+			
+			
+			
+			
+				
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="impl:postNewFlight" doc:id="800f3a9a-4304-496c-a370-2b9e6fb43712" >
+		<flow-ref doc:name="checkIfRouteExist" doc:id="dd685bc3-dc5a-4fef-b808-81e49ebc3a76" name="impl:getRouteBasedOnPayloadData" target="getRouteBasedOnPayloadData"/>
+		<choice doc:name="Choice" doc:id="970c14b5-023a-45e7-9394-dd323c60d44c" >
+			<when expression="#[dw::Core::isEmpty(vars.getRouteBasedOnPayloadData.airlineId)]">
+				<set-variable value="404" doc:name="Set Variable" doc:id="3350e8c4-aaf3-420e-813b-5cb20bc1b383" variableName="httpStatus" />
+				<set-payload value='#[output application/json --- {
+    "message" : "The route with the following data does not exist!, airlineId: "++ payload.airlineId ++ ", source airport Id:" ++ payload.sourceAirportId ++ ", destination airport Id:"++ payload.destinationAirportId,
+    "code" : 1002
+    }]' doc:name="Set Payload" doc:id="1200611f-5255-489b-9f45-a3a9339e76a3" />
+			</when>
+			<otherwise >
+				<db:insert doc:name="InsertNewFlight" doc:id="70aedfb4-522f-41d2-8fd4-c1f81ba6337d" config-ref="AirlineDatabaseConnectionConfig">
+					<db:sql >insert into flights_bassem ( Flight_Code,Airline_Name,Departure_Airport,Destination_Airport,Departure_Date,Aircraft_Type,Seat_Availability,Price) VALUES ( :flightCode, :airlineName , :departureAirport , :destinationAirport , :departureDate , :aircraftType , :seatAvailability, :price )</db:sql>
+					<db:input-parameters ><![CDATA[#[{"flightCode":payload.code,"airlineName": vars.getRouteBasedOnPayloadData[0].airlineName,"departureAirport": vars.getRouteBasedOnPayloadData[0].sourceAirport
+	,"destinationAirport" : vars.getRouteBasedOnPayloadData[0].destinationAirport,"departureDate" : payload.departureDate, "aircraftType" : payload.aircraftType default "",
+	"seatAvailability": payload.seatAvailability default 0,"price": payload.price default 0
+}]]]></db:input-parameters>
+				</db:insert>
+				<set-variable value="201" doc:name="Set Variable" doc:id="23269589-71a9-422c-8bd9-bacee2f90dfd" variableName="httpStatus" />
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="c888d0ef-7421-401b-a928-7533ff9e7c91" />
+			</otherwise>
+		</choice>
+	</flow>
+	
+</mule>

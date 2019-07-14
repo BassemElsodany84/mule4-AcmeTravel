@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+    <apikit:config name="airlinesAPI-config" raml="airlinesAPI.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <configuration doc:name="Configuration" doc:id="93b196ea-ecda-4b07-b26f-ffe4e8399521" defaultErrorHandler-ref="implmentationError_Handler" />
+	<flow name="airlinesAPI-main">
+        <http:listener path="/api/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="airlinesAPI-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST" enableNotifications="true" logException="true">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="7a96752e-6d39-489e-8224-4cfaa8f8ac87">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : error.description,
+    "code" : 1001
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="2b636838-8794-48d7-881a-c9a1f6a79baa">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="3730e57e-6c1d-4217-9a4f-e19a29b3ec53">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="10787694-5f24-473b-8f9a-3f44125be370">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="airlinesAPI-console">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="airlinesAPI-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\flights:airlinesAPI-config" doc:id="2df12a39-7a36-4aa1-9a43-d5cec0f4c240">
+        <flow-ref doc:name="Flow Reference" doc:id="f2ff2be1-3f52-4144-965e-7e7f457229fe" name="impl:getAllFlights"/>
+		<logger level="INFO" message="get:\flights:airlinesAPI-config" />
+    </flow>
+    <flow name="get:\flights\(flightCode):airlinesAPI-config">
+		<flow-ref doc:name="Flow Reference" doc:id="e21fe946-a705-4e0b-8407-35bebae7ef3f" name="impl:getFlightByFlightCode" />
+    </flow>
+	<flow name="get:\flights\(flightCode)\(departureDate):airlinesAPI-config" doc:id="b71d1a22-ccdd-41c2-8e63-08919ac96bdf">
+		<flow-ref doc:name="Flow Reference" doc:id="6842573c-1c9d-469b-827c-b97373cee8e4" name="impl:getFlightByFlightCodeFlightDeparture"/>
+	</flow>
+	<flow name="patch:\flights\(flightCode)\(departureDate):application\json:airlinesAPI-config">
+		<flow-ref doc:name="Flow Reference" doc:id="40c0639d-a050-4f1e-9f36-3e056c10c533" name="impl:PatchFlightByFlightCodeFlightDeparture"/>
+    </flow>
+	<flow name="post:\flights:application\json:airlinesAPI-config">
+		<flow-ref doc:name="Flow Reference" doc:id="065c190c-d118-4960-a434-edc5905ec186" name="impl:postNewFlight"/>
+    </flow>
+	<flow name="get:\airports:airlinesAPI-config">
+		<flow-ref doc:name="Flow Reference" doc:id="8bd50e03-88c2-4009-99c5-a582c266b3e4" name="impl:getAirportForAirline"/>
+    </flow>
+    <flow name="get:\routes:airlinesAPI-config">
+		<flow-ref doc:name="Flow Reference" doc:id="75447a2d-b9b9-4640-9479-f9039ccf1fff" name="impl:getRoute"/>
+    </flow>
+	<flow name="get:\routes\(airlineId):airlinesAPI-config" doc:id="ba12c5ac-8031-4f69-a48c-58ae2e814509" >
+		<flow-ref doc:name="getAllRoutesByRouteId" doc:id="7b8b5a16-1912-416a-b155-e0a5d239f2ba" name="impl:getRoute" />
+	</flow>
+	<flow name="get:\routes\(airlineId)\(sourceAirportId):airlinesAPI-config" doc:id="2f1e7724-d4c9-4f21-9555-5fdeb98f373c" >
+		<flow-ref doc:name="getAllRouteByIdAndSource" doc:id="40896ff3-76d1-4b7c-bbf5-72b6d1d93cef" name="impl:getRoute" />
+	</flow>
+	<flow name="get:\routes\(airlineId)\(sourceAirportId)\(destinationAirportId):airlinesAPI-config" doc:id="de5b06cb-5e81-40e8-ac4d-79ba5eb20ba6" >
+		<flow-ref doc:name="getAllRoutesbyIdAndSourceAndDestination" doc:id="16c64d1d-39cb-4f59-b2ce-e2cbd1bb4ace" name="impl:getRoute" />
+	</flow>
+</mule>

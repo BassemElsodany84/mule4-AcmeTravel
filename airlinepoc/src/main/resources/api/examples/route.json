@@ -1,0 +1,12 @@
+{
+  "airline": "CG",
+  "airlineId": 1308,
+  "sourceAirport": "MAG",
+  "sourceAirportId": 2,
+  "destinationAirport": "GKA",
+  "destinationAirportId": 1,
+  "codeShare": "",
+  "stops": 0,
+  "equipment": "DH8"
+
+}
