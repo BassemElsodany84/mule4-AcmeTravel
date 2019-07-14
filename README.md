@@ -1,3 +1,3 @@
 # mule4-AcmeTravel
 
-the project contains
+the project demonstrates MULE4 core and advanced components implmentations 
