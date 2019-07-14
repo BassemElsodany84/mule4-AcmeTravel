@@ -1,0 +1,407 @@
+{
+	"info": {
+		"_postman_id": "5aa3d9dc-ee8b-4d72-a082-a1ccebfe2103",
+		"name": "ACME Airline",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "airport",
+			"item": [
+				{
+					"name": "getPaginatedAirports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/airports?airlineName=British Airways&pageSize=20&offset=21",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"airports"
+							],
+							"query": [
+								{
+									"key": "airlineName",
+									"value": "British Airways"
+								},
+								{
+									"key": "pageSize",
+									"value": "20"
+								},
+								{
+									"key": "offset",
+									"value": "21"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "flight",
+			"item": [
+				{
+					"name": "getAllFlights",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/flights?pageSize=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getFlightByDepartureDate",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/flights?departureDate=2017-03-15",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights"
+							],
+							"query": [
+								{
+									"key": "departureDate",
+									"value": "2017-03-15"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getFlightByDepartureDate Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/flights?departureDate=2017-03-15",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights"
+							],
+							"query": [
+								{
+									"key": "departureDate",
+									"value": "2017-03-15"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getFlightByFlightCode",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/flights/BA105",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights",
+								"BA105"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getFlightByFlightCodeByDepartureDate",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/flights/BA105/2017-03-15  06:30:00",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights",
+								"BA105",
+								"2017-03-15  06:30:00"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ChangeFlightAvailabiltySeats",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"seatAvailability\": 46\n  }"
+						},
+						"url": {
+							"raw": "http://localhost:8085/api/flights/BA105/2017-03-15  06:30:00",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights",
+								"BA105",
+								"2017-03-15  06:30:00"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ChangeFlightPrice-increase",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": 200\n  }"
+						},
+						"url": {
+							"raw": "http://localhost:8085/api/flights/BA105/2017-03-15  06:30:00?priceAction=increase",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights",
+								"BA105",
+								"2017-03-15  06:30:00"
+							],
+							"query": [
+								{
+									"key": "priceAction",
+									"value": "increase"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ChangeFlightPrice-decrease",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": 100\n  }"
+						},
+						"url": {
+							"raw": "http://localhost:8085/api/flights/BA105/2017-03-15  06:30:00?priceAction=decrease",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights",
+								"BA105",
+								"2017-03-15  06:30:00"
+							],
+							"query": [
+								{
+									"key": "priceAction",
+									"value": "decrease"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateNewFlight",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"BA001\",\n    \"route\": {\n      \"airlineId\": 1355,\n      \"sourceAirportId\": 3797,\n      \"destinationAirportId\": 503\n    },\n    \"departureDate\": \"2019-07-14 20:30:00\",\n    \"aircraftType\": \"Airbus A318\",\n    \"seatAvailability\": 11,\n    \"price\": 100.00\n  }"
+						},
+						"url": {
+							"raw": "http://localhost:8085/api/flights",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"flights"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "route",
+			"item": [
+				{
+					"name": "getRoute",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/routes",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"routes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRoutebyAirlineId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/routes/1308",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"routes",
+								"1308"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRoutebyAirlineId-sourceAirportId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/routes/1308/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"routes",
+								"1308",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRoutebyAirlineId-sourceAirportId-destinationAirportId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8085/api/routes/1308/2/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8085",
+							"path": [
+								"api",
+								"routes",
+								"1308",
+								"2",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
